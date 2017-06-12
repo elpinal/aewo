@@ -1,0 +1,13 @@
+OASISFormat: 0.4
+Name:        Aweo
+Version:     0.1
+Synopsis:    All Emacs is Well Ordered.
+Authors:     El Pin Al
+License:     MIT
+Plugins:     META (0.4), DevFiles (0.4)
+Executable aewo
+  Path:       src
+  BuildTools: ocamlbuild
+  MainIs:     aewo.ml
+Test test_aewo
+  Command: $aewo test/input
