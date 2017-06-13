@@ -1,5 +1,6 @@
 let usage () =
         "All Emacs is Well Ordered.\n\
+         \n\
          usage:
          aewo command arguments...\n\
          \n\
