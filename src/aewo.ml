@@ -53,9 +53,23 @@ let build version =
         execDir dir "./configure" [| "--without-ns"; "--without-x" |];
         execDir dir "make" [| "-k"; "-j4" |]
 
+let is_symlink x =
+        let open Unix
+        in
+        let stats = stat x
+        in
+        stats.st_kind == S_LNK
+
 let link version =
         ensureDir (Filename.concat root "bin");
-        Unix.symlink "src/emacs" (Filename.concat root "bin/emacs")
+        let dest = (Filename.concat root "bin/emacs")
+        in
+        if (Sys.file_exists dest) && (is_symlink dest) then
+                Unix.unlink dest;
+        let src =
+                (Filename.concat (Filename.concat (Filename.concat root "emacs") version) "src/emacs")
+        in
+        Unix.symlink src dest
 
 let install = function
         | "" -> "install: version should be given" |> prerr_endline; exit 1
