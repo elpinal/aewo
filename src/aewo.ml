@@ -75,8 +75,8 @@ let link version =
         Unix.symlink src dest
 
 let install = function
-        | "" -> "install: version should be given" |> prerr_endline; exit 1
-        | version -> (
+        | None -> "install: version should be given" |> prerr_endline; exit 1
+        | Some version -> (
                 init defaultURI; (* update; *)
                 checkout version;
                 build version;
@@ -87,8 +87,8 @@ let install = function
 let uninstall version = ()
 
 let use = function
-        | "" -> "use: version should be given" |> prerr_endline; exit 1
-        | version -> link version
+        | None -> "use: version should be given" |> prerr_endline; exit 1
+        | Some version -> link version
 
 let run = function
         | "install" -> install
@@ -97,9 +97,9 @@ let run = function
         | name -> "no such command: " ^ name |> prerr_endline; exit 1
 
 let at n = function
-        | [||] -> ""
-        | a -> if 0 <= n && n < Array.length a then a.(n)
-               else ""
+        | [||] -> None
+        | a -> if 0 <= n && n < Array.length a then Some a.(n)
+               else None
 
 let () =
         if Array.length Sys.argv == 1 then usage ()
