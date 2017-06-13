@@ -6,8 +6,9 @@ Authors:     El Pin Al
 License:     MIT
 Plugins:     META (0.4), DevFiles (0.4)
 Executable aewo
-  Path:       src
-  BuildTools: ocamlbuild
-  MainIs:     aewo.ml
+  Path:         src
+  BuildTools:   ocamlbuild
+  MainIs:       aewo.ml
+  BuildDepends: unix
 Test test_aewo
   Command: $aewo test/input
