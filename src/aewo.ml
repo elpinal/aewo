@@ -69,7 +69,7 @@ let link version =
         ensureDir (Filename.concat root "bin");
         let dest = (Filename.concat root "bin/emacs")
         in
-        (* If dest is symlink, Sys.file_exists does not return true. So, || is used, not && *)
+        (* If dest is symlink, Sys.file_exists does not return true. So, || is used, not &&. *)
         if (Sys.file_exists dest) || (is_symlink dest) then
                 Sys.remove dest;
         Unix.symlink src dest
