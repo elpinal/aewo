@@ -56,19 +56,22 @@ let build version =
 let is_symlink x =
         let open Unix
         in
-        let stats = stat x
+        let stats = lstat x
         in
         stats.st_kind == S_LNK
 
 let link version =
-        ensureDir (Filename.concat root "bin");
-        let dest = (Filename.concat root "bin/emacs")
-        in
-        if (Sys.file_exists dest) && (is_symlink dest) then
-                Unix.unlink dest;
         let src =
                 (Filename.concat (Filename.concat (Filename.concat root "emacs") version) "src/emacs")
         in
+        if not (Sys.file_exists src) then
+                (Printf.sprintf "linking %s: executable does not exist" version |> prerr_endline; exit 1);
+        ensureDir (Filename.concat root "bin");
+        let dest = (Filename.concat root "bin/emacs")
+        in
+        (* If dest is symlink, Sys.file_exists does not return true. So, || is used, not && *)
+        if (Sys.file_exists dest) || (is_symlink dest) then
+                Sys.remove dest;
         Unix.symlink src dest
 
 let install = function
@@ -83,9 +86,14 @@ let install = function
 (* TODO: implement this *)
 let uninstall version = ()
 
+let use = function
+        | "" -> "use: version should be given" |> prerr_endline; exit 1
+        | version -> link version
+
 let run = function
         | "install" -> install
         | "uninstall" -> uninstall
+        | "use" -> use
         | name -> "no such command: " ^ name |> prerr_endline; exit 1
 
 let at n = function
