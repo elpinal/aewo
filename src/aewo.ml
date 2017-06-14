@@ -11,12 +11,12 @@ let usage () =
 
 let root = Filename.concat (Sys.getenv "HOME") ".aewo";;
 
-let defaultURI = "git://git.savannah.gnu.org/emacs.git";;
+let default_uri = "git://git.savannah.gnu.org/emacs.git";;
 
 (* Exec *)
 
 (* TODO: exit on error *)
-let execDir dir cmd args =
+let exec_dir dir cmd args =
         let pid = Unix.fork () in
                 if pid == 0 then (
                         Unix.chdir dir;
@@ -24,11 +24,11 @@ let execDir dir cmd args =
                 else
                         Unix.waitpid [] pid
 
-let exec = execDir (Unix.getcwd ())
+let exec = exec_dir (Unix.getcwd ())
 
 (* Main *)
 
-let ensureDir dirname =
+let ensure_dir dirname =
         if not (Sys.file_exists dirname) then
                 Unix.mkdir dirname 0o777
 
@@ -39,20 +39,20 @@ let init uri =
                 ())
 
 let checkout version =
-        ensureDir (Filename.concat root "emacs");
+        ensure_dir (Filename.concat root "emacs");
         let dir =
                 (Filename.concat (Filename.concat root "emacs") version)
         in
         exec "git" [| "clone"; (Filename.concat root "repo"); dir |];
-        execDir dir "git" [| "reset"; "--hard"; version |]
+        exec_dir dir "git" [| "reset"; "--hard"; version |]
 
 let build version =
         let dir =
                 (Filename.concat (Filename.concat root "emacs") version)
         in
-        execDir dir "./autogen.sh" [||];
-        execDir dir "./configure" [| "--without-ns"; "--without-x" |];
-        execDir dir "make" [| "-k"; "-j4" |]
+        exec_dir dir "./autogen.sh" [||];
+        exec_dir dir "./configure" [| "--without-ns"; "--without-x" |];
+        exec_dir dir "make" [| "-k"; "-j4" |]
 
 let is_symlink x =
         let open Unix
@@ -67,7 +67,7 @@ let link version =
         in
         if not (Sys.file_exists src) then
                 (Printf.sprintf "linking %s: executable does not exist" version |> prerr_endline; exit 1);
-        ensureDir (Filename.concat root "bin");
+        ensure_dir (Filename.concat root "bin");
         let dest = (Filename.concat root "bin/emacs")
         in
         (* If dest is symlink, Sys.file_exists does not return true. So, || is used, not &&. *)
@@ -78,7 +78,7 @@ let link version =
 let install = function
         | None -> "install: version should be given" |> prerr_endline; exit 1
         | Some version -> (
-                init defaultURI; (* update; *)
+                init default_uri; (* update; *)
                 checkout version;
                 build version;
                 link version;
