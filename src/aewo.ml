@@ -15,14 +15,19 @@ let default_uri = "git://git.savannah.gnu.org/emacs.git";;
 
 (* Exec *)
 
-(* TODO: exit on error *)
 let exec_dir dir cmd args =
-        let pid = Unix.fork () in
-                if pid == 0 then (
-                        Unix.chdir dir;
-                        Unix.execvp cmd (Array.append [|cmd|] args))
-                else
-                        Unix.waitpid [] pid
+        let open Unix in
+                let pid = Unix.fork () in
+                        if pid == 0 then (
+                                Unix.chdir dir;
+                                Unix.execvp cmd (Array.append [|cmd|] args))
+                        else
+                                match snd (Unix.waitpid [] pid) with
+                                          WEXITED 0 -> ()
+                                        | WEXITED code -> failwith (Printf.sprintf "%s exited with code: %d" cmd code)
+                                        | WSIGNALED signal -> failwith (Printf.sprintf "%s was killed with signal: %d" cmd signal)
+                                        | WSTOPPED signal -> failwith (Printf.sprintf "%s was stopped with signal: %d" cmd signal)
+
 
 let exec = exec_dir (Unix.getcwd ())
 
@@ -35,8 +40,7 @@ let ensure_dir dirname =
 let init uri =
         if not (Sys.file_exists root) then (
                 Unix.mkdir root 0o777;
-                exec "git" [| "clone"; "--mirror"; uri; (Filename.concat root "repo") |];
-                ())
+                exec "git" [| "clone"; "--mirror"; uri; (Filename.concat root "repo") |])
 
 let checkout version =
         ensure_dir (Filename.concat root "emacs");
@@ -81,8 +85,7 @@ let install = function
                 init default_uri; (* update; *)
                 checkout version;
                 build version;
-                link version;
-                ())
+                link version)
 
 (* TODO: implement this *)
 let uninstall version = ()
