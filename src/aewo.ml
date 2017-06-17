@@ -14,25 +14,22 @@ let root = Filename.concat (Sys.getenv "HOME") ".aewo"
 
 let default_uri = "git://git.savannah.gnu.org/emacs.git"
 
-(* Exec *)
+module Exec = struct
+  let with_dir dir cmd args =
+    let open Unix in
+    let pid = Unix.fork () in
+    if pid == 0 then (
+      Unix.chdir dir;
+      Unix.execvp cmd @@ Array.append [|cmd|] args
+    ) else
+      match snd (Unix.waitpid [] pid) with
+      | WEXITED 0 -> ()
+      | WEXITED code -> failwith @@ Printf.sprintf "%s exited with code: %d" cmd code
+      | WSIGNALED signal -> failwith @@ Printf.sprintf "%s was killed with signal: %d" cmd signal
+      | WSTOPPED signal -> failwith @@ Printf.sprintf "%s was stopped with signal: %d" cmd signal
 
-let exec_dir dir cmd args =
-  let open Unix in
-  let pid = Unix.fork () in
-  if pid == 0 then (
-    Unix.chdir dir;
-    Unix.execvp cmd @@ Array.append [|cmd|] args
-  ) else
-    match snd (Unix.waitpid [] pid) with
-    | WEXITED 0 -> ()
-    | WEXITED code -> failwith @@ Printf.sprintf "%s exited with code: %d" cmd code
-    | WSIGNALED signal -> failwith @@ Printf.sprintf "%s was killed with signal: %d" cmd signal
-    | WSTOPPED signal -> failwith @@ Printf.sprintf "%s was stopped with signal: %d" cmd signal
-
-
-let exec = exec_dir @@ Unix.getcwd ()
-
-(* Main *)
+  let exec = with_dir @@ Unix.getcwd ()
+end
 
 let ensure_dir dirname =
   if not @@ Sys.file_exists dirname then
@@ -41,7 +38,7 @@ let ensure_dir dirname =
 let init uri =
   if not @@ Sys.file_exists root then (
     Unix.mkdir root 0o777;
-    exec "git" [| "clone"; "--mirror"; uri; (Filename.concat root "repo") |]
+    Exec.exec "git" [| "clone"; "--mirror"; uri; (Filename.concat root "repo") |]
   )
 
 let checkout version =
@@ -49,16 +46,16 @@ let checkout version =
   let dir =
     Filename.concat (Filename.concat root "emacs") version
   in
-  exec "git" [| "clone"; Filename.concat root "repo"; dir |];
-  exec_dir dir "git" [| "reset"; "--hard"; version |]
+  Exec.exec "git" [| "clone"; Filename.concat root "repo"; dir |];
+  Exec.with_dir dir "git" [| "reset"; "--hard"; version |]
 
 let build version =
   let dir =
     Filename.concat (Filename.concat root "emacs") version
   in
-  exec_dir dir "./autogen.sh" [||];
-  exec_dir dir "./configure" [| "--without-ns"; "--without-x" |];
-  exec_dir dir "make" [| "-k"; "-j4" |]
+  Exec.with_dir dir "./autogen.sh" [||];
+  Exec.with_dir dir "./configure" [| "--without-ns"; "--without-x" |];
+  Exec.with_dir dir "make" [| "-k"; "-j4" |]
 
 let is_symlink x =
   let open Unix in
