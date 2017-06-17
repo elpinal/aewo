@@ -42,16 +42,15 @@ let init uri =
   )
 
 let checkout version =
-  ensure_dir @@ Filename.concat root "emacs";
-  let dir =
-    Filename.concat (Filename.concat root "emacs") version
-  in
+  let versions = Filename.concat root "emacs" in
+  ensure_dir versions;
+  let dir = Filename.concat versions version in
   Exec.exec "git" [| "clone"; Filename.concat root "repo"; dir |];
   Exec.with_dir dir "git" [| "reset"; "--hard"; version |]
 
 let build version =
   let dir =
-    Filename.concat (Filename.concat root "emacs") version
+    List.fold_left Filename.concat "" [root; "emacs"; version]
   in
   Exec.with_dir dir "./autogen.sh" [||];
   Exec.with_dir dir "./configure" [| "--without-ns"; "--without-x" |];
@@ -64,13 +63,14 @@ let is_symlink x =
 
 let link version =
   let src =
-    Filename.concat (Filename.concat (Filename.concat root "emacs") version) "src/emacs"
+    List.fold_left Filename.concat "" [root; "emacs"; version; "src/emacs"]
   in
   if not @@ Sys.file_exists src then (
     Printf.sprintf "linking %s: executable does not exist" version |> prerr_endline; exit 1
   );
-  ensure_dir @@ Filename.concat root "bin";
-  let dest = Filename.concat root "bin/emacs" in
+  let bin_dir = Filename.concat root "bin" in
+  ensure_dir bin_dir;
+  let dest = Filename.concat bin_dir "emacs" in
   (* If dest is symlink, Sys.file_exists does not return true. So, || is used, not &&. *)
   if Sys.file_exists dest || is_symlink dest then
     Sys.remove dest;
