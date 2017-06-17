@@ -21,31 +21,31 @@ let exec_dir dir cmd args =
   let pid = Unix.fork () in
   if pid == 0 then (
     Unix.chdir dir;
-    Unix.execvp cmd (Array.append [|cmd|] args)
+    Unix.execvp cmd @@ Array.append [|cmd|] args
   ) else
     match snd (Unix.waitpid [] pid) with
     | WEXITED 0 -> ()
-    | WEXITED code -> failwith (Printf.sprintf "%s exited with code: %d" cmd code)
-    | WSIGNALED signal -> failwith (Printf.sprintf "%s was killed with signal: %d" cmd signal)
-    | WSTOPPED signal -> failwith (Printf.sprintf "%s was stopped with signal: %d" cmd signal)
+    | WEXITED code -> failwith @@ Printf.sprintf "%s exited with code: %d" cmd code
+    | WSIGNALED signal -> failwith @@ Printf.sprintf "%s was killed with signal: %d" cmd signal
+    | WSTOPPED signal -> failwith @@ Printf.sprintf "%s was stopped with signal: %d" cmd signal
 
 
-let exec = exec_dir (Unix.getcwd ())
+let exec = exec_dir @@ Unix.getcwd ()
 
 (* Main *)
 
 let ensure_dir dirname =
-  if not (Sys.file_exists dirname) then
+  if not @@ Sys.file_exists dirname then
     Unix.mkdir dirname 0o777
 
 let init uri =
-  if not (Sys.file_exists root) then (
+  if not @@ Sys.file_exists root then (
     Unix.mkdir root 0o777;
     exec "git" [| "clone"; "--mirror"; uri; (Filename.concat root "repo") |]
   )
 
 let checkout version =
-  ensure_dir (Filename.concat root "emacs");
+  ensure_dir @@ Filename.concat root "emacs";
   let dir =
     Filename.concat (Filename.concat root "emacs") version
   in
@@ -69,10 +69,10 @@ let link version =
   let src =
     Filename.concat (Filename.concat (Filename.concat root "emacs") version) "src/emacs"
   in
-  if not (Sys.file_exists src) then (
+  if not @@ Sys.file_exists src then (
     Printf.sprintf "linking %s: executable does not exist" version |> prerr_endline; exit 1
   );
-  ensure_dir (Filename.concat root "bin");
+  ensure_dir @@ Filename.concat root "bin";
   let dest = Filename.concat root "bin/emacs" in
   (* If dest is symlink, Sys.file_exists does not return true. So, || is used, not &&. *)
   if Sys.file_exists dest || is_symlink dest then
@@ -108,4 +108,4 @@ let at n = function
 
 let () =
   if Array.length Sys.argv == 1 then usage ()
-  else run Sys.argv.(1) (at 2 Sys.argv)
+  else run Sys.argv.(1) @@ at 2 Sys.argv
