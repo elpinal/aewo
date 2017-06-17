@@ -7,11 +7,11 @@ let usage () =
          commands:
          install      Install a specified version of Emacs.
          uninstall    Uninstall a specified version of Emacs.
-         " |> print_endline;;
+         " |> print_endline
 
-let root = Filename.concat (Sys.getenv "HOME") ".aewo";;
+let root = Filename.concat (Sys.getenv "HOME") ".aewo"
 
-let default_uri = "git://git.savannah.gnu.org/emacs.git";;
+let default_uri = "git://git.savannah.gnu.org/emacs.git"
 
 (* Exec *)
 
