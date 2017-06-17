@@ -49,9 +49,7 @@ let checkout version =
   Exec.with_dir dir "git" [| "reset"; "--hard"; version |]
 
 let build version =
-  let dir =
-    List.fold_left Filename.concat "" [root; "emacs"; version]
-  in
+  let dir = List.fold_left Filename.concat "" [root; "emacs"; version] in
   Exec.with_dir dir "./autogen.sh" [||];
   Exec.with_dir dir "./configure" [| "--without-ns"; "--without-x" |];
   Exec.with_dir dir "make" [| "-k"; "-j4" |]
@@ -62,9 +60,7 @@ let is_symlink x =
   stats.st_kind == S_LNK
 
 let link version =
-  let src =
-    List.fold_left Filename.concat "" [root; "emacs"; version; "src/emacs"]
-  in
+  let src = List.fold_left Filename.concat "" [root; "emacs"; version; "src/emacs"] in
   if not @@ Sys.file_exists src then (
     Printf.sprintf "linking %s: executable does not exist" version |> prerr_endline; exit 1
   );
