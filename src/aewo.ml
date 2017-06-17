@@ -48,11 +48,14 @@ let checkout version =
   Exec.exec "git" [| "clone"; Filename.concat root "repo"; dir |];
   Exec.with_dir dir "git" [| "reset"; "--hard"; version |]
 
+let uncurry f = fun (x, y) -> f x y
+
 let build version =
   let dir = List.fold_left Filename.concat "" [root; "emacs"; version] in
-  Exec.with_dir dir "./autogen.sh" [||];
-  Exec.with_dir dir "./configure" [| "--without-ns"; "--without-x" |];
-  Exec.with_dir dir "make" [| "-k"; "-j4" |]
+  List.iter (uncurry @@ Exec.with_dir dir) [ ("./autogen.sh", [||])
+                                           ; ("./configure", [| "--without-ns"; "--without-x" |])
+                                           ; ("make", [| "-k"; "-j4" |])
+                                           ]
 
 let is_symlink x =
   let open Unix in
