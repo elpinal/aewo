@@ -52,9 +52,9 @@ let uncurry f = fun (x, y) -> f x y
 
 let build version =
   let dir = List.fold_left Filename.concat "" [root; "emacs"; version] in
-  List.iter (uncurry @@ Exec.with_dir dir) [ ("./autogen.sh", [||])
-                                           ; ("./configure", [| "--without-ns"; "--without-x" |])
-                                           ; ("make", [| "-k"; "-j4" |])
+  List.iter (uncurry @@ Exec.with_dir dir) [ "./autogen.sh", [||]
+                                           ; "./configure", [| "--without-ns"; "--without-x" |]
+                                           ; "make", [| "-k"; "-j4" |]
                                            ]
 
 let is_symlink x =
