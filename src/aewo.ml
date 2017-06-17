@@ -7,6 +7,7 @@ let usage () =
    commands:
    install      Install a specified version of Emacs.
    uninstall    Uninstall a specified version of Emacs.
+   use          Set a specified version of Emacs as current program.
    " |> print_endline
 
 let root = Filename.concat (Sys.getenv "HOME") ".aewo"
