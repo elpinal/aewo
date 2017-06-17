@@ -38,7 +38,7 @@ let ensure_dir dirname =
 let init uri =
   if not @@ Sys.file_exists root then (
     Unix.mkdir root 0o777;
-    Exec.exec "git" [| "clone"; "--mirror"; uri; (Filename.concat root "repo") |]
+    Exec.exec "git" [| "clone"; "--mirror"; uri; Filename.concat root "repo" |]
   )
 
 let checkout version =
