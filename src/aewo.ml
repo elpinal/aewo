@@ -92,8 +92,18 @@ let use = function
   | None -> "use: version should be given" |> prerr_endline; exit 1
   | Some version -> link version
 
+let twice f x = f @@ f x
+
+let print_item version =
+  let linked = Unix.readlink @@ List.fold_left Filename.concat "" [root; "bin"; "emacs"] in
+  let current = Filename.basename @@ twice Filename.dirname linked in
+  if version = current then
+    print_endline @@ "* " ^ version
+  else
+    print_endline @@ "  " ^ version
+
 let list = function
-  | None -> Array.iter print_endline @@ Sys.readdir @@ Filename.concat root "emacs"
+  | None -> Array.iter print_item @@ Sys.readdir @@ Filename.concat root "emacs"
   | _ -> "usage: list" |> prerr_endline; exit 1
 
 let run = function
