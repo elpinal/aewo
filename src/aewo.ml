@@ -8,6 +8,7 @@ let usage () =
    install      Install a specified version of Emacs.
    uninstall    Uninstall a specified version of Emacs.
    use          Set a specified version of Emacs as current program.
+   list         List versions.
    " |> print_endline
 
 let root = Filename.concat (Sys.getenv "HOME") ".aewo"
@@ -91,10 +92,15 @@ let use = function
   | None -> "use: version should be given" |> prerr_endline; exit 1
   | Some version -> link version
 
+let list = function
+  | None -> Array.iter print_endline @@ Sys.readdir @@ Filename.concat root "emacs"
+  | _ -> "usage: list" |> prerr_endline; exit 1
+
 let run = function
   | "install" -> install
   | "uninstall" -> uninstall
   | "use" -> use
+  | "list" -> list
   | name -> "no such command: " ^ name |> prerr_endline; exit 1
 
 let at n = function
