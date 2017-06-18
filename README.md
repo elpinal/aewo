@@ -4,6 +4,12 @@ All Emacs is Well Ordered.
 
 ## Install
 
+To install, use `make`:
+
+```bash
+$ make install
+```
+
 ## Contribution
 
 1. Fork ([https://github.com/elpinal/aewo/fork](https://github.com/elpinal/aewo/fork))
