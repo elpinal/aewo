@@ -85,8 +85,11 @@ let install = function
     link version
   )
 
-(* TODO: implement this *)
-let uninstall version = ()
+let uninstall = function
+  | None -> prerr_endline "uninstall: version should be givin";exit 1
+  | Some version ->
+     try Sys.remove @@ List.fold_left Filename.concat "" [root; "emacs"; version] with
+     | Sys_error msg -> prerr_endline @@ Printf.sprintf "remove %S: %s" version msg; exit 1
 
 let use = function
   | None -> "use: version should be given" |> prerr_endline; exit 1
