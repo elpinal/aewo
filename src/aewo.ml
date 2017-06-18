@@ -78,12 +78,11 @@ let link version =
 
 let install = function
   | None -> "install: version should be given" |> prerr_endline; exit 1
-  | Some version -> (
-    init default_uri; (* update; *)
-    checkout version;
-    build version;
-    link version
-  )
+  | Some version ->
+     init default_uri; (* update; *)
+     checkout version;
+     build version;
+     link version
 
 let uninstall = function
   | None -> prerr_endline "uninstall: version should be givin";exit 1
