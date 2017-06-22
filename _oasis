@@ -5,10 +5,30 @@ Synopsis:    All Emacs is Well Ordered.
 Authors:     El Pin Al
 License:     MIT
 Plugins:     META (0.4), DevFiles (0.4)
+
+Library exec
+  Path: exec
+  Modules: Exec
+  BuildTools: ocamlbuild
+  BuildDepends: unix
+
 Executable aewo
   Path:         src
   BuildTools:   ocamlbuild
   MainIs:       aewo.ml
-  BuildDepends: unix
+  BuildDepends: unix, exec
+
+Executable test_aewo
+  Path: test
+  MainIs: test_aewo.ml
+  Build$: flag(tests)
+  BuildTools: ocamlbuild
+  CompiledObject: best
+  Install: false
+  BuildDepends: exec, oUnit
+
 Test test_aewo
-  Command: $aewo test/input
+  Run$: flag(tests)
+  TestTools: test_aewo
+  Command: $test_aewo
+  WorkingDirectory: test

@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: d0501355ce41b93f77abf36abe820260)
+# DO NOT EDIT (digest: c860ade0a13a045239856f0234a36542)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -14,7 +14,19 @@ true: annot, bin_annot
 ".git": not_hygienic
 "_darcs": -traverse
 "_darcs": not_hygienic
+# Library exec
+"exec/exec.cmxs": use_exec
+<exec/*.ml{,i,y}>: pkg_unix
 # Executable aewo
 "src/aewo.byte": pkg_unix
+"src/aewo.byte": use_exec
 <src/*.ml{,i,y}>: pkg_unix
+<src/*.ml{,i,y}>: use_exec
+# Executable test_aewo
+<test/test_aewo.{native,byte}>: pkg_oUnit
+<test/test_aewo.{native,byte}>: pkg_unix
+<test/test_aewo.{native,byte}>: use_exec
+<test/*.ml{,i,y}>: pkg_oUnit
+<test/*.ml{,i,y}>: pkg_unix
+<test/*.ml{,i,y}>: use_exec
 # OASIS_STOP

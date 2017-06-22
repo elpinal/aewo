@@ -15,23 +15,6 @@ let root = Filename.concat (Sys.getenv "HOME") ".aewo"
 
 let default_uri = "git://git.savannah.gnu.org/emacs.git"
 
-module Exec = struct
-  let with_dir dir cmd args =
-    let open Unix in
-    let pid = Unix.fork () in
-    if pid == 0 then (
-      Unix.chdir dir;
-      Unix.execvp cmd @@ Array.append [|cmd|] args
-    ) else
-      match snd (Unix.waitpid [] pid) with
-      | WEXITED 0 -> ()
-      | WEXITED code -> failwith @@ Printf.sprintf "%s exited with code: %d" cmd code
-      | WSIGNALED signal -> failwith @@ Printf.sprintf "%s was killed with signal: %d" cmd signal
-      | WSTOPPED signal -> failwith @@ Printf.sprintf "%s was stopped with signal: %d" cmd signal
-
-  let exec = with_dir @@ Unix.getcwd ()
-end
-
 let ensure_dir dirname =
   if not @@ Sys.file_exists dirname then
     Unix.mkdir dirname 0o777
